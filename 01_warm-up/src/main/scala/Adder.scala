@@ -21,15 +21,17 @@ import chisel3.util._
 class HalfAdder extends Module{
   
   val io = IO(new Bundle {
-    /* 
-     * TODO: Define IO ports of a half adder as presented in the lecture
-     */
+   val a  = Input(UInt(1.W))
+   val b  = Input(UInt(1.W))
+   val s  = Output(UInt(1.W))
+   val co = Output(UInt(1.W))
+   
     })
+  val sum = Wire(UInt(2.W))
 
-  /* 
-   * TODO: Describe output behaviour based on the input values
-   */
-
+  sum := io.a + io.b
+  io.s := sum(0)
+  io.co := sum(1)
 }
 
 /** 
@@ -43,24 +45,28 @@ class HalfAdder extends Module{
   * There should be no delay between input and output signals, we want to have
   * a combinational behaviour of the component.
   */
+
 class FullAdder extends Module{
 
   val io = IO(new Bundle {
-    /* 
-     * TODO: Define IO ports of a half adder as presented in the lecture
-     */
+   val a  = Input(UInt(1.W))
+   val b  = Input(UInt(1.W))
+   val ci = Input(UInt(1.W))
+   val s  = Output(UInt(1.W))
+   val co = Output(UInt(1.W))
     })
 
 
-  /* 
-   * TODO: Instanciate the two half adders you want to use based on your HalfAdder class
-   */
+  val HalfAdder1(new HalfAdder)
+  val HalfAdder2(new HalfAdder)
 
+  HalfAdder1.io.a:= io.a
+  HalfAdder1.io.b:= io.b
+  HalfAdder2.io.a := HalfAdder1.io.co
+  HalfAdder2.io.b := HalfAdder1.io.s
 
-  /* 
-   * TODO: Describe output behaviour based on the input values and the internal signals
-   */
-
+  io.s := HalfAdder2.io.s
+  io.co := HalfAdder1.io.co | HalfAdder2.io.co
 }
 
 /** 
@@ -76,17 +82,30 @@ class FullAdder extends Module{
 class FourBitAdder extends Module{
 
   val io = IO(new Bundle {
-    /* 
-     * TODO: Define IO ports of a 4-bit ripple-carry-adder as presented in the lecture
-     */
+   val a  = Input(UInt(4.W))
+   val b  = Input(UInt(4.W))
+   val s  = Output(UInt(4.W))
+   val co = Output(UInt(1.W))
     })
-
-  /* 
-   * TODO: Instanciate the full adders and one half adderbased on the previously defined classes
-   */
-
-
-  /* 
-   * TODO: Describe output behaviour based on the input values and the internal 
-   */
+  val HAdder(new HalfAdder)
+  val FAdder1(new FullAdder)
+  val FAdder2(new FullAdder)
+  val FAdder3(new FullAdder)
+  //LSB
+  HAdder.io.a:= io.a(0)
+  HAdder.io.b:= io.b(0)
+  //bit 1
+  FAdder1.io.a:= io.a(1)
+  FAdder1.io.b:= io.b(1)
+  FAdder1.io.ci:= io.Hadder.co
+  //bit 2  
+  FAdder2.io.a:= io.a(2)
+  FAdder2.io.b:= io.b(2)
+  FAdder2.io.ci:= io.FAdder1.co
+  //bit 3 
+  FAdder3.io.a:= io.a(3)
+  FAdder3.io.b:= io.b(3)
+  FAdder3.io.ci:= io.FAdder2.co  
+  io.s := cat(HAdder.io.s,FAdder1.io.s, FAdder2.io.s,FAdder3.io.s)
+  io.co := FAdder3.io.co
 }
