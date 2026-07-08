@@ -36,15 +36,15 @@ class Controller extends Module{
 class Counter extends Module{
   
   val io = IO(new Bundle {
-    /* 
-     * TODO: Define IO ports of a the component as stated in the documentation
-     */
-    })
+   val cnt_en = Input(Bool())
+   val reset_n = Input(Bool())
+   val cnt_s = Output (Bool())
 
-  // internal variables
-  /* 
-   * TODO: Define internal variables (registers and/or wires), if needed
-   */
+    })
+    val counter = RegInit(8.U(4.W))
+  when (io.reset_n){
+   
+  } .otherwise {}
 
   // state machine
   /* 

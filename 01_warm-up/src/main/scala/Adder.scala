@@ -29,7 +29,7 @@ class HalfAdder extends Module{
     })
   val sum = Wire(UInt(2.W))
 
-  sum := io.a + io.b
+  sum := io.a +& io.b
   io.s := sum(0)
   io.co := sum(1)
 }
@@ -57,13 +57,13 @@ class FullAdder extends Module{
     })
 
 
-  val HalfAdder1(new HalfAdder)
-  val HalfAdder2(new HalfAdder)
+  val HalfAdder1 = Module (new HalfAdder)
+  val HalfAdder2 = Module(new HalfAdder)
 
   HalfAdder1.io.a:= io.a
   HalfAdder1.io.b:= io.b
-  HalfAdder2.io.a := HalfAdder1.io.co
-  HalfAdder2.io.b := HalfAdder1.io.s
+  HalfAdder2.io.b := io.ci
+  HalfAdder2.io.a := HalfAdder1.io.s
 
   io.s := HalfAdder2.io.s
   io.co := HalfAdder1.io.co | HalfAdder2.io.co
@@ -87,25 +87,25 @@ class FourBitAdder extends Module{
    val s  = Output(UInt(4.W))
    val co = Output(UInt(1.W))
     })
-  val HAdder(new HalfAdder)
-  val FAdder1(new FullAdder)
-  val FAdder2(new FullAdder)
-  val FAdder3(new FullAdder)
-  //LSB
+  val HAdder = Module(new HalfAdder)
+  val FAdder1 = Module(new FullAdder)
+  val FAdder2 = Module(new FullAdder)
+  val FAdder3 = Module(new FullAdder)
+  //LSB (bit 0)
   HAdder.io.a:= io.a(0)
   HAdder.io.b:= io.b(0)
   //bit 1
   FAdder1.io.a:= io.a(1)
   FAdder1.io.b:= io.b(1)
-  FAdder1.io.ci:= io.Hadder.co
+  FAdder1.io.ci:= HAdder.io.co
   //bit 2  
   FAdder2.io.a:= io.a(2)
   FAdder2.io.b:= io.b(2)
-  FAdder2.io.ci:= io.FAdder1.co
-  //bit 3 
+  FAdder2.io.ci:= FAdder1.io.co
+  //MSB (bit 3)
   FAdder3.io.a:= io.a(3)
   FAdder3.io.b:= io.b(3)
-  FAdder3.io.ci:= io.FAdder2.co  
-  io.s := cat(HAdder.io.s,FAdder1.io.s, FAdder2.io.s,FAdder3.io.s)
+  FAdder3.io.ci:= FAdder2.io.co  
+  io.s := Cat(FAdder3.io.s, FAdder2.io.s, FAdder1.io.s, HAdder.io.s)
   io.co := FAdder3.io.co
 }
