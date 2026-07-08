@@ -14,20 +14,49 @@ import chisel3.util._
 class Controller extends Module{
   
   val io = IO(new Bundle {
-    /* 
-     * TODO: Define IO ports of a the component as stated in the documentation
-     */
+     val reset_n = Input(Bool())
+     val rxd = Input(UInt(1.W))
+     val cnt_s = Input(Bool())
+     val cnt_en = Output(Bool())
+     val valid = Output(UInt(1.W))
     })
-
-  // internal variables
-  /* 
-   * TODO: Define internal variables (registers and/or wires), if needed
-   */
-
-  // state machine
-  /* 
-   * TODO: Describe functionality if the controller as a state machine
-   */
+    val idle :: recieving :: done :: Nil = Enum(3)
+    val state = RegInit(idle)
+    io.cnt_en := false.B
+    io.valid := 0.U
+  when (io.reset_n){
+   io.valid := 0.U
+   io.cnt_en := false.B
+   state:= idle
+   }
+   .otherwise{
+   switch(state){
+    is(idle){
+   io.valid := 0.U
+   io.cnt_en := false.B
+   when (io.rxd === 0.U){
+  state:= recieving
+    }
+    }
+   is(recieving){
+      io.valid := 0.U
+   io.cnt_en := true.B
+    when (io.cnt_s){state:=done}
+   }
+   is(done){
+    io.cnt_en :=false.B
+    io.valid := 1.U
+    when(io.rxd===0.U){state:= recieving}.otherwise{state:= idle}
+   }
+   }
+   
+   
+   
+   
+   
+   
+   
+   }
 
 }
 
@@ -44,7 +73,7 @@ class Counter extends Module{
     val counter = RegInit(8.U(4.W))
   when (io.reset_n){
    counter := 8.U
-  } elsewhen (!io.cnt_en){
+  } .elsewhen (!io.cnt_en){
     counter := 8.U
   } .otherwise {
    counter:= counter -1.U
@@ -89,22 +118,31 @@ class ShiftRegister extends Module{
 class ReadSerial extends Module{
   
   val io = IO(new Bundle {
-    /* 
-     * TODO: Define IO ports of a the component as stated in the documentation
-     */
+     val reset_n = Input(Bool())
+     val rxd = Input(UInt(1.W))
+
+     val data = Output(UInt(8.W))
+     val valid = Output(UInt(1.W))
+
     })
 
 
-  // instanciation of modules
-  /* 
-   * TODO: Instanciate the modules that you need
-   */
+  val ControllerSR = Module(new Controller)
+  val CounterSR = Module(new Counter)
+  val SReg = Module(new ShiftRegister)
 
-  // connections between modules
-  /* 
-   * TODO: connect the signals between the modules
-   */
+ ControllerSR.io.rxd := io.rxd
+ SReg.io.rxd:= io.rxd
 
+ ControllerSR.io.reset_n:=io.reset_n
+ CounterSR.io.reset_n:=io.reset_n
+ SReg.io.reset_n:=io.reset_n
+
+CounterSR.io.cnt_en:=ControllerSR.io.cnt_en
+ControllerSR.io.cnt_s:= CounterSR.io.cnt_s
+SReg.io.cnt_en:=ControllerSR.io.cnt_en
+ io.data := SReg.io.data
+ io.valid:= ControllerSR.io.valid
   // global I/O 
   /* 
    * TODO: Describe output behaviour based on the input values and the internal signals
