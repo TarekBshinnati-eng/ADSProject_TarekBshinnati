@@ -43,9 +43,13 @@ class Counter extends Module{
     })
     val counter = RegInit(8.U(4.W))
   when (io.reset_n){
-   
-  } .otherwise {}
-
+   counter := 8.U
+  } elsewhen (!io.cnt_en){
+    counter := 8.U
+  } .otherwise {
+   counter:= counter -1.U
+  }
+   io.cnt_s := (io.cnt_en && (counter===1.U))
   // state machine
   /* 
    * TODO: Describe functionality if the counter as a state machine
@@ -58,20 +62,17 @@ class Counter extends Module{
 class ShiftRegister extends Module{
   
   val io = IO(new Bundle {
-    /* 
-     * TODO: Define IO ports of a the component as stated in the documentation
-     */
+    val rxd = Input(UInt(1.W))
+    val cnt_en = Input(Bool())
+    val reset_n = Input(Bool())
+    val data = Output(UInt(8.W))
     })
 
-  // internal variables
-  /* 
-   * TODO: Define internal variables (registers and/or wires), if needed
-   */
+   val Sreg = RegInit(0.U(8.W))
+   when (io.reset_n){Sreg:=0.U} .elsewhen (io.cnt_en){ Sreg := (Sreg<<1)+io.rxd}
 
-  // functionality
-  /* 
-   * TODO: Describe functionality if the shift register
-   */
+   io.data := Sreg
+ 
 }
 
 /** 
