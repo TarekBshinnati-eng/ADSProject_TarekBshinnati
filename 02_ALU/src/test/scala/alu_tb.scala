@@ -21,13 +21,318 @@ class ALUAddTest extends AnyFlatSpec with ChiselScalatestTester {
       dut.io.operation.poke(ALUOp.ADD)
       dut.io.aluResult.expect(20.U)
       dut.clock.step(1)
+      dut.io.operandA.poke("hffffffff".U)
+      dut.io.operandB.poke(1.U)
+      dut.io.operation.poke(ALUOp.ADD)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("hffffffff".U)
+      dut.io.operandB.poke("hffffffff".U)
+      dut.io.operation.poke(ALUOp.ADD)
+      dut.io.aluResult.expect("hfffffffe".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h7fffffff".U)
+      dut.io.operandB.poke(1.U)
+      dut.io.operation.poke(ALUOp.ADD)
+      dut.io.aluResult.expect("h80000000".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(0.U)
+      dut.io.operandB.poke(0.U)
+      dut.io.operation.poke(ALUOp.ADD)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+    }
+  }
+}
+//sub
+class ALUSubTest extends AnyFlatSpec with ChiselScalatestTester {
+  "ALU_Sub_Tester" should "test SUB operation" in {
+    test(new ALU).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(0)
 
-      //ToDo: add more test cases for ADD operation
+
+      dut.io.operandA.poke(20.U)
+      dut.io.operandB.poke(10.U)
+      dut.io.operation.poke(ALUOp.SUB)
+      dut.io.aluResult.expect(10.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(0.U)
+      dut.io.operandB.poke(1.U)
+      dut.io.operation.poke(ALUOp.SUB)
+      dut.io.aluResult.expect("hffffffff".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h80000000".U)
+      dut.io.operandB.poke(1.U)
+      dut.io.operation.poke(ALUOp.SUB)
+      dut.io.aluResult.expect("h7fffffff".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h80000000".U)
+      dut.io.operandB.poke("h80000000".U)
+      dut.io.operation.poke(ALUOp.SUB)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(0.U)
+      dut.io.operandB.poke(0.U)
+      dut.io.operation.poke(ALUOp.SUB)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+    }
+  }
+}
+//and
+class ALUAndTest extends AnyFlatSpec with ChiselScalatestTester {
+  "ALU_And_Tester" should "test AND operation" in {
+    test(new ALU).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(0)
+
+      dut.io.operandA.poke("hf0f0f0f0".U)
+      dut.io.operandB.poke("h0f0f0f0f".U)
+      dut.io.operation.poke(ALUOp.AND)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("hffffffff".U)
+      dut.io.operandB.poke("h12345678".U)
+      dut.io.operation.poke(ALUOp.AND)
+      dut.io.aluResult.expect("h12345678".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h00000000".U)
+      dut.io.operandB.poke("h87654321".U)
+      dut.io.operation.poke(ALUOp.AND)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h87654321".U)
+      dut.io.operandB.poke("h00000000".U)
+      dut.io.operation.poke(ALUOp.AND)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+      dut.io.operandB.poke("h87654321".U)
+      dut.io.operandA.poke("h87654321".U)
+      dut.io.operation.poke(ALUOp.AND)
+      dut.io.aluResult.expect("h87654321".U)
+      dut.clock.step(1)
+    }
+  }
+}
+//or
+class ALUOrTest extends AnyFlatSpec with ChiselScalatestTester {
+  "ALU_Or_Tester" should "test OR operation" in {
+    test(new ALU).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(0)
+
+      dut.io.operandA.poke("hf0f0f0f0".U)
+      dut.io.operandB.poke("h0f0f0f0f".U)
+      dut.io.operation.poke(ALUOp.OR)
+      dut.io.aluResult.expect("hffffffff".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(0.U)
+      dut.io.operandB.poke("h12345678".U)
+      dut.io.operation.poke(ALUOp.OR)
+      dut.io.aluResult.expect("h12345678".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("hffffffff".U)
+      dut.io.operandB.poke("h12345678".U)
+      dut.io.operation.poke(ALUOp.OR)
+      dut.io.aluResult.expect("hffffffff".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h12345678".U)
+      dut.io.operandB.poke("hffffffff".U)
+      dut.io.operation.poke(ALUOp.OR)
+      dut.io.aluResult.expect("hffffffff".U)
+      dut.clock.step(1)
+      dut.io.operandB.poke("h87654321".U)
+      dut.io.operandA.poke("h87654321".U)
+      dut.io.operation.poke(ALUOp.OR)
+      dut.io.aluResult.expect("h87654321".U)
+      dut.clock.step(1)
+    }
+  }
+}
+//xor
+class ALUXorTest extends AnyFlatSpec with ChiselScalatestTester {
+  "ALU_Xor_Tester" should "test XOR operation" in {
+    test(new ALU).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(0)
+      dut.io.operandA.poke("haaaaaaaa".U)
+      dut.io.operandB.poke("h55555555".U)
+      dut.io.operation.poke(ALUOp.XOR)
+      dut.io.aluResult.expect("hffffffff".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h12345678".U)
+      dut.io.operandB.poke("h12345678".U)
+      dut.io.operation.poke(ALUOp.XOR)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(0.U)
+      dut.io.operandB.poke("h55555555".U)
+      dut.io.operation.poke(ALUOp.XOR)
+      dut.io.aluResult.expect("h55555555".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("hffffffff".U)
+      dut.io.operandB.poke("heeeeeeee".U)
+      dut.io.operation.poke(ALUOp.XOR)
+      dut.io.aluResult.expect("h11111111".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("heeeeeeee".U)
+      dut.io.operandB.poke("hffffffff".U)
+      dut.io.operation.poke(ALUOp.XOR)
+      dut.io.aluResult.expect("h11111111".U)
+      dut.clock.step(1)
+    }
+  }
+}
+//shift left logical
+class ALUSllTest extends AnyFlatSpec with ChiselScalatestTester {
+  "ALU_Sll_Tester" should "test SLL operation" in {
+    test(new ALU).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(0)
+
+      dut.io.operandA.poke(1.U)
+      dut.io.operandB.poke(1.U)
+      dut.io.operation.poke(ALUOp.SLL)
+      dut.io.aluResult.expect(2.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(1.U)
+      dut.io.operandB.poke(31.U)
+      dut.io.operation.poke(ALUOp.SLL)
+      dut.io.aluResult.expect("h80000000".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(1.U)
+      dut.io.operandB.poke(32.U)
+      dut.io.operation.poke(ALUOp.SLL)
+      dut.io.aluResult.expect(1.U)
+      dut.clock.step(1)
 
     }
   }
 }
 
-// ---------------------------------------------------
-// ToDo: Add test classes for all other ALU operations
-//---------------------------------------------------
+//shift right logical
+class ALUSrlTest extends AnyFlatSpec with ChiselScalatestTester {
+  "ALU_Srl_Tester" should "test SRL operation" in {
+    test(new ALU).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(0)
+
+      dut.io.operandA.poke("h80000000".U)
+      dut.io.operandB.poke(1.U)
+      dut.io.operation.poke(ALUOp.SRL)
+      dut.io.aluResult.expect("h40000000".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("hffffffff".U)
+      dut.io.operandB.poke(31.U)
+      dut.io.operation.poke(ALUOp.SRL)
+      dut.io.aluResult.expect(1.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h12345678".U)
+      dut.io.operandB.poke(32.U)
+      dut.io.operation.poke(ALUOp.SRL)
+      dut.io.aluResult.expect("h12345678".U)
+      dut.clock.step(1)
+
+    }
+  }
+}
+//shift right arithmetic
+class ALUSraTest extends AnyFlatSpec with ChiselScalatestTester {
+  "ALU_Sra_Tester" should "test SRA operation" in {
+    test(new ALU).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(0)
+
+      dut.io.operandA.poke("h80000000".U)
+      dut.io.operandB.poke(1.U)
+      dut.io.operation.poke(ALUOp.SRA)
+      dut.io.aluResult.expect("hc0000000".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("hffffffff".U)
+      dut.io.operandB.poke(31.U)
+      dut.io.operation.poke(ALUOp.SRA)
+      dut.io.aluResult.expect("hffffffff".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h7fffffff".U)
+      dut.io.operandB.poke(1.U)
+      dut.io.operation.poke(ALUOp.SRA)
+      dut.io.aluResult.expect("h3fffffff".U)
+      dut.clock.step(1)
+
+    }
+  }
+}
+// strictly less than 
+class ALUSltTest extends AnyFlatSpec with ChiselScalatestTester {
+  "ALU_Slt_Tester" should "test SLT operation" in {
+    test(new ALU).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(0)
+
+      dut.io.operandA.poke("hffffffff".U)
+      dut.io.operandB.poke(0.U)
+      dut.io.operation.poke(ALUOp.SLT)
+      dut.io.aluResult.expect(1.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h7fffffff".U)
+      dut.io.operandB.poke("h80000000".U)
+      dut.io.operation.poke(ALUOp.SLT)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(10.U)
+      dut.io.operandB.poke(10.U)
+      dut.io.operation.poke(ALUOp.SLT)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("h8fffffff".U)
+      dut.io.operandB.poke(10.U)
+      dut.io.operation.poke(ALUOp.SLT)
+      dut.io.aluResult.expect(1.U)
+      dut.clock.step(1)
+
+    }
+  }
+}
+
+//strictly less than unsigned
+class ALUSltuTest extends AnyFlatSpec with ChiselScalatestTester {
+  "ALU_Sltu_Tester" should "test SLTU operation" in {
+    test(new ALU).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(0)
+
+      dut.io.operandA.poke("hffffffff".U)
+      dut.io.operandB.poke(0.U)
+      dut.io.operation.poke(ALUOp.SLTU)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(0.U)
+      dut.io.operandB.poke("hffffffff".U)
+      dut.io.operation.poke(ALUOp.SLTU)
+      dut.io.aluResult.expect(1.U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(10.U)
+      dut.io.operandB.poke(10.U)
+      dut.io.operation.poke(ALUOp.SLTU)
+      dut.io.aluResult.expect(0.U)
+      dut.clock.step(1)
+
+    }
+  }
+}
+// PassB
+class ALUPassBTest extends AnyFlatSpec with ChiselScalatestTester {
+  "ALU_PassB_Tester" should "test PASSB operation" in {
+    test(new ALU).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+      dut.clock.setTimeout(0)
+
+      dut.io.operandA.poke(0.U)
+      dut.io.operandB.poke("h12345678".U)
+      dut.io.operation.poke(ALUOp.PASSB)
+      dut.io.aluResult.expect("h12345678".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke("hffffffff".U)
+      dut.io.operandB.poke("h12345678".U)
+      dut.io.operation.poke(ALUOp.PASSB)
+      dut.io.aluResult.expect("h12345678".U)
+      dut.clock.step(1)
+      dut.io.operandA.poke(10.U)
+      dut.io.operandB.poke("hffffffff".U)
+      dut.io.operation.poke(ALUOp.PASSB)
+      dut.io.aluResult.expect("hffffffff".U)
+      dut.clock.step(1)
+    }
+  }
+}
