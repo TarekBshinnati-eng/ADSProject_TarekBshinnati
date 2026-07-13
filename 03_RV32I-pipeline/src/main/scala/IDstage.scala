@@ -45,7 +45,7 @@ import uopc._
 // Decode Stage
 // -----------------------------------------
 class ID extends Module {
-    val io = newe IO(new Bundle){
+    val io = IO(new Bundle{
     val instr = Input(UInt(32.W))
     val regFileReq_A  = Output(new regFileReadReq)
     val regFileResp_A = Input(new regFileReadResp)
@@ -56,7 +56,7 @@ class ID extends Module {
     val operandA = Output(UInt(32.W))
     val operandB = Output(UInt(32.W))
     val XcptInvalid = Output(Bool())
-    }
+    })
     val opcode = io.instr(6, 0)
   val rd     = io.instr(11, 7)
   val funct3 = io.instr(14, 12)
@@ -68,7 +68,7 @@ class ID extends Module {
   io.regFileReq_A.addr := rs1
   io.regFileReq_B.addr := rs2
   io.uop := uopc.NOP
-  io.rd  := rd
+  io.rd  := 0.U
   io.operandA := io.regFileResp_A.data
   io.operandB := io.regFileResp_B.data
   io.XcptInvalid := true.B
@@ -181,4 +181,8 @@ class ID extends Module {
       }
     }
   }
+ when(!io.XcptInvalid){
+    io.rd :=rd
+ } 
+
 }

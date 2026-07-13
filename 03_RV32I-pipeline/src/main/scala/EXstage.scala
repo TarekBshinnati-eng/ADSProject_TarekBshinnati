@@ -97,7 +97,6 @@ class EX extends Module {
     is(uopc.SRLI) {
       alu.io.operation := ALUOp.SRL
     }
-    }
     is(uopc.OR) {
       alu.io.operation := ALUOp.OR
     }
@@ -116,6 +115,8 @@ class EX extends Module {
     is(uopc.SRAI) {
       alu.io.operation := ALUOp.SRA
   }
+    }
+    
   io.aluResult := alu.io.aluResult
   io.outRD := io.inRD
   io.outXcptInvalid := io.inXcptInvalid

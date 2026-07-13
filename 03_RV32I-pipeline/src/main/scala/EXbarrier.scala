@@ -43,7 +43,7 @@ class EXBarrier extends Module {
     val outXcptInvalid  =Output(Bool())
   })
   val aluResultReg = RegInit(0.U(32.W))
-val rdReg    = RegInit(0.U(5.W))
+val rdReg  = RegInit(0.U(5.W))
   val XcptInvalidReg = RegInit(false.B)
   aluResultReg := io.inAluResult
   rdReg := io.inRD

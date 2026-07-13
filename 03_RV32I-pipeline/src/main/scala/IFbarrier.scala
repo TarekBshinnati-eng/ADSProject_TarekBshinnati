@@ -29,7 +29,7 @@ import chisel3._
 // -----------------------------------------
 
 class IFBarrier extends Module {
-  val io = IO(new Bundle {
+
   val io = IO(new Bundle {
   val inInstr = Input(UInt(32.W))
   val outInstr = Output(UInt(32.W))
@@ -38,4 +38,3 @@ class IFBarrier extends Module {
   instrReg := io.inInstr
   io.outInstr := instrReg
 }
-}   
