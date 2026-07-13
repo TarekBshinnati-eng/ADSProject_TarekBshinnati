@@ -40,4 +40,99 @@ import uopc._
 // Execute Stage
 // -----------------------------------------
 
-//ToDo: Add your implementation according to the specification above here 
+class EX extends Module {
+  val io = IO(new Bundle {
+    val inUOP = Input(uopc())
+    val inRD = Input(UInt(5.W))
+    val inOperandA = Input(UInt(32.W))
+    val inOperandB = Input(UInt(32.W))
+    val inXcptInvalid = Input(Bool())
+    val aluResult = Output(UInt(32.W))
+    val outRD = Output(UInt(5.W))
+    val outXcptInvalid = Output(Bool())
+    val forwardA = Input(UInt(2.W))
+    val forwardB = Input(UInt(2.W))
+    val forwardData_MEM = Input(UInt(32.W))
+    val forwardData_WB  = Input(UInt(32.W))
+  })
+  val alu = Module(new ALU)
+  val operandAForwarded = Wire(UInt(32.W))
+  val operandBForwarded = Wire(UInt(32.W))
+  operandAForwarded:= io.inOperandA
+  operandBForwarded:= io.inOperandB
+  when(io.forwardA === 2.U) {
+   operandAForwarded:= io.forwardData_MEM
+  }.elsewhen(io.forwardA === 1.U) {
+  operandAForwarded := io.forwardData_WB
+}
+when(io.forwardB === 2.U) {
+  operandBForwarded:= io.forwardData_MEM
+}.elsewhen(io.forwardB=== 1.U) {
+  operandBForwarded :=io.forwardData_WB
+}
+alu.io.operandA:= operandAForwarded
+alu.io.operandB :=operandBForwarded
+  alu.io.operation:= ALUOp.ADD
+  switch(io.inUOP) {
+    is(uopc.ADD) {
+      alu.io.operation:= ALUOp.ADD
+    }
+    is(uopc.ADDI) {
+      alu.io.operation := ALUOp.ADD
+    }
+    is(uopc.SUB) {
+      alu.io.operation := ALUOp.SUB
+    }
+    is(uopc.SLL) {
+      alu.io.operation := ALUOp.SLL
+    }
+    is(uopc.SLLI) {
+      alu.io.operation := ALUOp.SLL
+    }
+    is(uopc.SLT) {
+      alu.io.operation := ALUOp.SLT
+    }
+    is(uopc.SLTI) {
+      alu.io.operation := ALUOp.SLT
+    }
+    is(uopc.SLTU){
+      alu.io.operation:= ALUOp.SLTU
+    }
+    is(uopc.SLTIU) {
+      alu.io.operation := ALUOp.SLTU
+    }
+    is(uopc.XOR) {
+      alu.io.operation :=ALUOp.XOR
+    }
+    is(uopc.XORI){
+      alu.io.operation := ALUOp.XOR
+    }
+    is(uopc.SRL){
+      alu.io.operation := ALUOp.SRL
+    }
+    is(uopc.SRLI) {
+      alu.io.operation := ALUOp.SRL
+    }
+    is(uopc.OR) {
+      alu.io.operation := ALUOp.OR
+    }
+    is(uopc.ORI){
+      alu.io.operation := ALUOp.OR
+    }
+    is(uopc.AND){
+      alu.io.operation := ALUOp.AND
+    }
+    is(uopc.ANDI){
+      alu.io.operation:= ALUOp.AND
+    }
+    is(uopc.SRA) {
+      alu.io.operation := ALUOp.SRA
+    }
+    is(uopc.SRAI) {
+      alu.io.operation := ALUOp.SRA
+  }
+    }
+  io.aluResult := alu.io.aluResult
+  io.outRD := io.inRD
+  io.outXcptInvalid := io.inXcptInvalid
+}

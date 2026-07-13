@@ -58,9 +58,83 @@ import uopc._
 
 class PipelinedRV32Icore (BinaryFile: String) extends Module {
   val io = IO(new Bundle {
-    //ToDo: Add I/O ports
+    val check_res = Output(UInt(32.W))
+    val exception = Output(Bool())
   })
 
-//ToDo: Add your implementation according to the specification above here 
+  val ifStage = Module(new IF(BinaryFile))
+  val ifBarrier = Module(new IFBarrier)
+  val idStage = Module(new ID)
+  val idBarrier = Module(new IDBarrier)
+  val exStage = Module(new EX)
+  val exBarrier= Module(new EXBarrier)
+  val memStage = Module(new MEM)
+  val memBarrier= Module(new MEMBarrier)
+  val wbStage =Module(new WB)
+  val wbBarrier = Module(new WBBarrier)
+  val registerFile = Module(new regFile)
+  val forwardingUnit = Module(new ForwardingUnit)
 
+  
+  // IF Stage to IF Barrier to ID Stage
+  ifBarrier.io.inInstr := ifStage.io.instr
+  idStage.io.instr:= ifBarrier.io.outInstr
+
+  // Register File Read Ports to ID Stage
+  registerFile.io.req_1 := idStage.io.regFileReq_A
+  idStage.io.regFileResp_A := registerFile.io.resp_1
+  registerFile.io.req_2 := idStage.io.regFileReq_B
+  idStage.io.regFileResp_B := registerFile.io.resp_2
+
+  // ID Stage to ID Barrier
+  idBarrier.io.inUOP:= idStage.io.uop
+  idBarrier.io.inRD:= idStage.io.rd
+  idBarrier.io.inOperandA:= idStage.io.operandA
+  idBarrier.io.inOperandB:= idStage.io.operandB
+  idBarrier.io.inXcptInvalid := idStage.io.XcptInvalid
+  idBarrier.io.inRS1 := idStage.io.rs1
+  idBarrier.io.inRS2 := idStage.io.rs2
+  // ID Barrier to EX Stage
+  exStage.io.inUOP:= idBarrier.io.outUOP
+  exStage.io.inRD := idBarrier.io.outRD
+  exStage.io.inOperandA := idBarrier.io.outOperandA
+  exStage.io.inOperandB := idBarrier.io.outOperandB
+  exStage.io.inXcptInvalid := idBarrier.io.outXcptInvalid
+
+  // EX Stage to EX Barrier
+  exBarrier.io.inAluResult := exStage.io.aluResult
+  exBarrier.io.inRD := exStage.io.outRD
+  exBarrier.io.inXcptInvalid := exStage.io.outXcptInvalid
+
+// Forwarding Unit
+  forwardingUnit.io.rs1_EX := idBarrier.io.outRS1
+  forwardingUnit.io.rs2_EX := idBarrier.io.outRS2
+  forwardingUnit.io.rd_MEM := exBarrier.io.outRD
+  forwardingUnit.io.rd_WB  := memBarrier.io.outRD
+  forwardingUnit.io.wrEn_MEM :=     (exBarrier.io.outRD =/= 0.U) &&  !exBarrier.io.outXcptInvalid
+  forwardingUnit.io.wrEn_WB := (memBarrier.io.outRD =/= 0.U) &&     !memBarrier.io.outException
+  exStage.io.forwardA := forwardingUnit.io.forwardA
+  exStage.io.forwardB := forwardingUnit.io.forwardB
+  exStage.io.forwardData_MEM := exBarrier.io.outAluResult
+  exStage.io.forwardData_WB  := memBarrier.io.outAluResult
+  
+  // EX Barrier to MEM Barrier
+  memBarrier.io.inAluResult := exBarrier.io.outAluResult
+  memBarrier.io.inRD := exBarrier.io.outRD
+  memBarrier.io.inException := exBarrier.io.outXcptInvalid
+
+  // MEM Barrier to WB Stage
+  wbStage.io.aluResult := memBarrier.io.outAluResult
+  wbStage.io.rd := memBarrier.io.outRD
+
+  // WB Stage to Register File Write Port
+  registerFile.io.req_3 := wbStage.io.regFileReq
+
+  // WB Stage and Exception to WB Barrier
+  wbBarrier.io.inCheckRes    := wbStage.io.check_res
+  wbBarrier.io.inXcptInvalid := memBarrier.io.outException
+
+  // Final Core outputs
+  io.check_res := wbBarrier.io.outCheckRes
+  io.exception := wbBarrier.io.outXcptInvalid
 }
